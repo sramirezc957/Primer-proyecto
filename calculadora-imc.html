@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de IMC</title>
+<style>
+  :root {
+    --bg: #0D0D0D;
+    --accent: #C9A84C;
+    --text: #E8D5A0;
+    --panel: #161616;
+    --border: #2A2620;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 16px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 480px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px 28px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  }
+
+  h1 {
+    margin: 0 0 6px;
+    font-size: 1.5rem;
+    color: var(--accent);
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 0.85rem;
+    opacity: 0.7;
+    margin-bottom: 28px;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    opacity: 0.9;
+  }
+
+  input, select {
+    background: #1B1B1B;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  input::placeholder {
+    color: #8a7a56;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.2);
+  }
+
+  .row {
+    display: flex;
+    gap: 12px;
+  }
+
+  .row .field {
+    flex: 1;
+  }
+
+  button {
+    margin-top: 8px;
+    background: linear-gradient(135deg, #E4C874, var(--accent));
+    color: #17140A;
+    border: none;
+    padding: 15px 18px;
+    border-radius: 10px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    box-shadow: 0 6px 18px rgba(201, 168, 76, 0.25);
+  }
+
+  button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.05);
+    box-shadow: 0 10px 24px rgba(201, 168, 76, 0.35);
+  }
+
+  button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(201, 168, 76, 0.25);
+  }
+
+  #resultado {
+    margin-top: 26px;
+    padding: 20px;
+    border-radius: 10px;
+    background: #1B1B1B;
+    border: 1px solid var(--border);
+    display: none;
+  }
+
+  #resultado.visible {
+    display: block;
+  }
+
+  .imc-valor {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-align: center;
+    margin: 0;
+  }
+
+  .categoria {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 4px 0 16px;
+  }
+
+  .categoria.bajo { color: #7FB3E8; }
+  .categoria.normal { color: #7FE8A0; }
+  .categoria.sobrepeso { color: #E8C874; }
+  .categoria.obesidad { color: #E87F7F; }
+
+  .comentario {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    opacity: 0.9;
+    margin-bottom: 14px;
+  }
+
+  .alerta {
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    margin-top: 10px;
+  }
+
+  .alerta h3 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--accent);
+    margin: 0 0 8px;
+  }
+
+  .alerta ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .disclaimer {
+    margin-top: 18px;
+    font-size: 0.72rem;
+    opacity: 0.55;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 420px) {
+    .card {
+      padding: 24px 18px;
+    }
+    .row {
+      flex-direction: column;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Calculadora de IMC</h1>
+    <p class="subtitle">Calcula tu Índice de Masa Corporal de forma rápida y clara</p>
+
+    <form id="imcForm">
+      <div class="row">
+        <div class="field">
+          <label for="peso">Peso (kg)</label>
+          <input type="number" id="peso" placeholder="Ej. 70" min="1" max="400" step="0.1" required>
+        </div>
+        <div class="field">
+          <label for="estatura">Estatura (cm)</label>
+          <input type="number" id="estatura" placeholder="Ej. 170" min="50" max="250" step="0.1" required>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="edad">Edad (años)</label>
+          <input type="number" id="edad" placeholder="Ej. 30" min="1" max="120" step="1" required>
+        </div>
+        <div class="field">
+          <label for="sexo">Sexo</label>
+          <select id="sexo" required>
+            <option value="" disabled selected>Selecciona</option>
+            <option value="femenino">Femenino</option>
+            <option value="masculino">Masculino</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit">Calcular mi IMC</button>
+    </form>
+
+    <div id="resultado">
+      <p class="imc-valor" id="valorImc"></p>
+      <p class="categoria" id="categoriaImc"></p>
+      <p class="comentario" id="comentarioImc"></p>
+      <div class="alerta" id="alertaAccion">
+        <h3>Si necesitas actuar hoy mismo</h3>
+        <ul id="listaAccion"></ul>
+      </div>
+    </div>
+
+    <p class="disclaimer">Esta calculadora es informativa y no sustituye una valoración médica profesional.</p>
+  </div>
+
+<script>
+  const form = document.getElementById('imcForm');
+  const resultado = document.getElementById('resultado');
+  const valorImc = document.getElementById('valorImc');
+  const categoriaImc = document.getElementById('categoriaImc');
+  const comentarioImc = document.getElementById('comentarioImc');
+  const listaAccion = document.getElementById('listaAccion');
+  const alertaAccion = document.getElementById('alertaAccion');
+
+  function clasificar(imc) {
+    if (imc < 18.5) {
+      return {
+        clase: 'bajo',
+        nombre: 'Bajo peso',
+        comentario: 'Tu peso está por debajo del rango considerado saludable para tu estatura. Esto puede afectar tus defensas y niveles de energía si se mantiene en el tiempo.',
+        acciones: [
+          'Si sientes mareos, debilidad extrema o has perdido peso sin explicación, consulta a un médico hoy mismo.',
+          'Prioriza una comida completa y nutritiva en las próximas horas si llevas tiempo comiendo poco.'
+        ],
+        urgente: false
+      };
+    } else if (imc < 25) {
+      return {
+        clase: 'normal',
+        nombre: 'Peso normal',
+        comentario: 'Tu IMC se encuentra dentro del rango saludable. Mantener buenos hábitos de alimentación y actividad física te ayudará a conservarlo.',
+        acciones: [
+          'Mantén una rutina de actividad física regular, aunque sea moderada.',
+          'Continúa con una alimentación balanceada y buena hidratación.'
+        ],
+        urgente: false
+      };
+    } else if (imc < 30) {
+      return {
+        clase: 'sobrepeso',
+        nombre: 'Sobrepeso',
+        comentario: 'Tu IMC indica sobrepeso. No es una emergencia, pero es un buen momento para ajustar hábitos y evitar que la tendencia continúe.',
+        acciones: [
+          'Reduce hoy mismo las porciones de alimentos ultraprocesados y azúcares.',
+          'Agrega al menos 20-30 minutos de caminata o actividad física hoy.'
+        ],
+        urgente: false
+      };
+    } else {
+      return {
+        clase: 'obesidad',
+        nombre: 'Obesidad',
+        comentario: 'Tu IMC está en el rango de obesidad, asociado a mayor riesgo de enfermedades cardiovasculares y metabólicas. Vale la pena tomar acción pronto.',
+        acciones: [
+          'Si tienes dolor de pecho, dificultad para respirar o hinchazón repentina, busca atención médica hoy mismo.',
+          'Agenda una cita con un médico o nutricionista esta semana para armar un plan seguro y sostenible.'
+        ],
+        urgente: true
+      };
+    }
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const peso = parseFloat(document.getElementById('peso').value);
+    const estaturaCm = parseFloat(document.getElementById('estatura').value);
+
+    if (!peso || !estaturaCm || peso <= 0 || estaturaCm <= 0) {
+      return;
+    }
+
+    const estaturaM = estaturaCm / 100;
+    const imc = peso / (estaturaM * estaturaM);
+    const info = clasificar(imc);
+
+    valorImc.textContent = imc.toFixed(1);
+    categoriaImc.textContent = info.nombre;
+    categoriaImc.className = 'categoria ' + info.clase;
+    comentarioImc.textContent = info.comentario;
+
+    listaAccion.innerHTML = '';
+    info.acciones.forEach(function (accion) {
+      const li = document.createElement('li');
+      li.textContent = accion;
+      listaAccion.appendChild(li);
+    });
+
+    alertaAccion.style.display = 'block';
+
+    resultado.classList.add('visible');
+    resultado.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+</script>
+</body>
+</html>
